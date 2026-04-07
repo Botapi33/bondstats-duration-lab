@@ -11,9 +11,7 @@ body{margin:0;font-family:-apple-system,Arial;background:#0b1220;color:#fff}
 .sidebar{background:#111827;padding:20px}
 .main{padding:20px;overflow:auto}
 
-h2{margin-top:0}
-
-input,button{
+input,button,textarea{
 width:100%;
 padding:12px;
 margin-bottom:10px;
@@ -22,10 +20,11 @@ border-radius:8px;
 }
 
 input{background:#020617;color:#fff}
+textarea{background:#020617;color:#fff;height:160px}
 
 button{
 background:linear-gradient(90deg,#2563eb,#3b82f6);
-color:#fff;
+color:white;
 cursor:pointer;
 font-weight:bold;
 }
@@ -52,6 +51,21 @@ border-left:4px solid #3b82f6;
 margin-bottom:20px;
 }
 
+.portfolio-item{
+background:#020617;
+padding:10px;
+margin-bottom:8px;
+display:flex;
+justify-content:space-between;
+border-radius:8px;
+}
+
+.delete-btn{
+background:#ef4444;
+padding:6px 10px;
+width:auto;
+}
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -66,24 +80,6 @@ padding:8px;
 canvas{
 background:#020617;
 margin-top:20px;
-border-radius:10px;
-}
-
-/* PORTFOLIO */
-.portfolio-item{
-background:#020617;
-padding:10px;
-margin-bottom:8px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-border-radius:8px;
-}
-
-.delete-btn{
-background:#ef4444;
-padding:6px 10px;
-width:auto;
 }
 </style>
 </head>
@@ -108,9 +104,13 @@ width:auto;
 
 <h3>Portfolio</h3>
 <button id="addBtn">Add Bond</button>
-<button id="portfolioBtn">Run Portfolio</button>
+<button id="portfolioBtn">Analyze Portfolio</button>
 
 <div id="portfolioList"></div>
+
+<hr>
+
+<button id="reportBtn">Generate Report</button>
 
 </div>
 
@@ -134,8 +134,11 @@ width:auto;
 <tbody id="table"></tbody>
 </table>
 
-<h3>Portfolio Output</h3>
+<h3>Portfolio Analysis</h3>
 <div id="portfolioOutput"></div>
+
+<h3>Report</h3>
+<textarea id="report"></textarea>
 
 </div>
 
@@ -147,6 +150,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 let portfolio=[];
 
+// ELEMENTS
 const face=document.getElementById("face");
 const coupon=document.getElementById("coupon");
 const yieldEl=document.getElementById("yield");
@@ -164,6 +168,7 @@ const chart=document.getElementById("chart");
 
 const portfolioList=document.getElementById("portfolioList");
 const portfolioOutput=document.getElementById("portfolioOutput");
+const report=document.getElementById("report");
 
 // CALC
 function calc(F,c,y,n){
@@ -189,12 +194,12 @@ return {price,dur,mod,conv};
 
 // INSIGHT
 function getInsight(r){
-if(r.mod>8) return "High interest rate sensitivity";
-if(r.mod>5) return "Moderate sensitivity";
-return "Low sensitivity";
+if(r.mod>8) return "High duration exposure → strong sensitivity to rates.";
+if(r.mod>5) return "Moderate risk → noticeable reaction to yield shifts.";
+return "Low duration → stable bond behavior.";
 }
 
-// RUN
+// RUN SINGLE
 function run(){
 
 let F=+face.value;
@@ -212,7 +217,7 @@ conv.textContent=r.conv.toFixed(2);
 
 insight.textContent=getInsight(r);
 
-// TABLE
+// SCENARIOS
 let shocks=[-200,-100,-50,-25,25,50,100,200];
 table.innerHTML="";
 let pts=[];
@@ -240,7 +245,6 @@ ctx.beginPath();
 pts.forEach((p,i)=>{
 let x=i*(900/pts.length);
 let y=125-p*2000;
-
 if(i===0) ctx.moveTo(x,y);
 else ctx.lineTo(x,y);
 });
@@ -248,25 +252,24 @@ else ctx.lineTo(x,y);
 ctx.strokeStyle="cyan";
 ctx.stroke();
 
+window.lastResult={r,p};
+
 }
 
-// ADD BOND
+// ADD
 function addBond(){
-
-let F=+face.value;
-let c=+coupon.value/100;
-let y=+yieldEl.value/100;
-let n=+years.value;
-let p=+pos.value;
-
-portfolio.push({F,c,y,n,p});
-
+portfolio.push({
+F:+face.value,
+c:+coupon.value/100,
+y:+yieldEl.value/100,
+n:+years.value,
+p:+pos.value
+});
 renderPortfolio();
 }
 
 // RENDER
 function renderPortfolio(){
-
 portfolioList.innerHTML="";
 
 portfolio.forEach((b,i)=>{
@@ -281,43 +284,84 @@ div.innerHTML=`
 portfolioList.appendChild(div);
 });
 
-// delete
 document.querySelectorAll(".delete-btn").forEach(btn=>{
-btn.addEventListener("click",function(){
-let id=this.getAttribute("data-id");
-portfolio.splice(id,1);
+btn.onclick=function(){
+portfolio.splice(this.dataset.id,1);
 renderPortfolio();
+};
 });
-});
-
 }
 
-// RUN PORTFOLIO
-function runPortfolio(){
+// ANALYZE PORTFOLIO
+function analyzePortfolio(){
 
 if(portfolio.length===0){
-alert("No bonds added");
+alert("Add bonds first");
 return;
 }
 
-let total=0;
+let totalValue=0;
+let totalDur=0;
+let totalConv=0;
 
 portfolio.forEach(b=>{
 let r=calc(b.F,b.c,b.y,b.n);
-total+=b.p*(-r.mod*0.01);
+
+totalValue+=b.p;
+totalDur+=r.mod*b.p;
+totalConv+=r.conv*b.p;
 });
 
-portfolioOutput.textContent=
-"Portfolio P/L (100bps): "+total.toFixed(0);
+let avgDur=totalDur/totalValue;
+let avgConv=totalConv/totalValue;
+
+let dv01=totalValue*avgDur*0.0001;
+
+let risk="Low";
+if(avgDur>7) risk="High";
+else if(avgDur>4) risk="Moderate";
+
+portfolioOutput.innerHTML=`
+Total Value: $${totalValue.toFixed(0)}<br>
+Avg Duration: ${avgDur.toFixed(2)}<br>
+Convexity: ${avgConv.toFixed(2)}<br>
+DV01: $${dv01.toFixed(2)}<br>
+Risk Level: ${risk}
+`;
+}
+
+// REPORT
+function generateReport(){
+
+if(!window.lastResult){
+alert("Run analysis first");
+return;
+}
+
+let r=window.lastResult.r;
+
+report.value=`
+Bond Duration Report
+
+Price: ${r.price.toFixed(2)}
+Duration: ${r.dur.toFixed(2)}
+Convexity: ${r.conv.toFixed(2)}
+
+Insight:
+${getInsight(r)}
+
+Portfolio:
+${portfolioOutput.innerText}
+`;
 }
 
 // EVENTS
-document.getElementById("runBtn").addEventListener("click",run);
-document.getElementById("addBtn").addEventListener("click",addBond);
-document.getElementById("portfolioBtn").addEventListener("click",runPortfolio);
+document.getElementById("runBtn").onclick=run;
+document.getElementById("addBtn").onclick=addBond;
+document.getElementById("portfolioBtn").onclick=analyzePortfolio;
+document.getElementById("reportBtn").onclick=generateReport;
 
 });
-
 </script>
 
 </body>
