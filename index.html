@@ -79,24 +79,15 @@ border-radius:10px;
 
 <h2>Bond Setup</h2>
 
-<label>Face Value ($)</label>
 <input id="face" value="1000">
-
-<label>Coupon (%)</label>
 <input id="coupon" value="5">
-
-<label>Yield (%)</label>
 <input id="yield" value="4">
-
-<label>Maturity (Years)</label>
 <input id="years" value="10">
-
-<label>Position ($)</label>
 <input id="pos" value="100000">
 
-<button onclick="run()">Run Analysis</button>
-<button onclick="addBond()">Add to Portfolio</button>
-<button onclick="runPortfolio()">Run Portfolio</button>
+<button id="runBtn">Run Analysis</button>
+<button id="addBtn">Add to Portfolio</button>
+<button id="portfolioBtn">Run Portfolio</button>
 
 </div>
 
@@ -123,15 +114,33 @@ border-radius:10px;
 <h3>Portfolio Output</h3>
 <div id="portfolioOutput"></div>
 
-<textarea id="export" style="width:100%;height:120px;margin-top:20px;background:#020617;color:white"></textarea>
-
 </div>
 
 </div>
 
 <script>
 
-// CORE CALCULATION
+// SAFE INIT
+document.addEventListener("DOMContentLoaded", function(){
+
+const face=document.getElementById("face");
+const coupon=document.getElementById("coupon");
+const yieldEl=document.getElementById("yield");
+const years=document.getElementById("years");
+const pos=document.getElementById("pos");
+
+const price=document.getElementById("price");
+const dur=document.getElementById("dur");
+const mod=document.getElementById("mod");
+const conv=document.getElementById("conv");
+const insight=document.getElementById("insight");
+
+const table=document.getElementById("table");
+const chart=document.getElementById("chart");
+
+let portfolio=[];
+
+// CALC
 function calc(F,c,y,n){
 let price=0,dur=0,conv=0;
 
@@ -153,38 +162,38 @@ conv=conv/(price*Math.pow(1+y,2));
 return {price,dur,mod,conv};
 }
 
-// INSIGHT ENGINE
-function generateInsight(r){
-if(r.mod>7){
-return "High duration bond → very sensitive to rate changes.";
-}
-if(r.mod>4){
-return "Moderate duration → balanced interest rate exposure.";
-}
-return "Low duration → relatively stable against rate moves.";
+// INSIGHT
+function getInsight(r){
+if(r.mod>7) return "High rate sensitivity → large price swings expected.";
+if(r.mod>4) return "Moderate sensitivity → balanced exposure.";
+return "Low sensitivity → relatively stable bond.";
 }
 
-// MAIN
+// RUN
 function run(){
 
-let F=+face.value;
-let c=+coupon.value/100;
-let y=+yield.value/100;
-let n=+years.value;
-let posVal=+pos.value;
+let F=parseFloat(face.value);
+let c=parseFloat(coupon.value)/100;
+let y=parseFloat(yieldEl.value)/100;
+let n=parseFloat(years.value);
+let p=parseFloat(pos.value);
+
+if(isNaN(F)||isNaN(c)||isNaN(y)||isNaN(n)||isNaN(p)){
+alert("Invalid input");
+return;
+}
 
 let r=calc(F,c,y,n);
 
-// KPIs
-price.innerText=r.price.toFixed(2);
-dur.innerText=r.dur.toFixed(2);
-mod.innerText=r.mod.toFixed(2);
-conv.innerText=r.conv.toFixed(2);
+// OUTPUT
+price.textContent=r.price.toFixed(2);
+dur.textContent=r.dur.toFixed(2);
+mod.textContent=r.mod.toFixed(2);
+conv.textContent=r.conv.toFixed(2);
 
-// INSIGHT
-insight.innerText=generateInsight(r);
+insight.textContent=getInsight(r);
 
-// TABLE + CHART
+// TABLE
 let shocks=[-200,-100,-50,-25,25,50,100,200];
 table.innerHTML="";
 let pts=[];
@@ -192,28 +201,23 @@ let pts=[];
 shocks.forEach(s=>{
 let dy=s/10000;
 let change=(-r.mod*dy+0.5*r.conv*dy*dy);
-let pnl=posVal*change;
+let pnl=p*change;
 
 pts.push(change);
 
-table.innerHTML+=`
-<tr>
-<td>${s}</td>
-<td>${(change*100).toFixed(2)}%</td>
-<td>${pnl.toFixed(0)}</td>
-</tr>`;
+let row=document.createElement("tr");
+row.innerHTML=`<td>${s}</td><td>${(change*100).toFixed(2)}%</td><td>${pnl.toFixed(0)}</td>`;
+table.appendChild(row);
 });
 
-// DRAW
+// CHART
 let ctx=chart.getContext("2d");
 ctx.clearRect(0,0,900,250);
-
 ctx.beginPath();
 
 pts.forEach((p,i)=>{
 let x=i*(900/pts.length);
 let y=125-p*2000;
-
 if(i===0) ctx.moveTo(x,y);
 else ctx.lineTo(x,y);
 });
@@ -222,24 +226,14 @@ ctx.strokeStyle="cyan";
 ctx.lineWidth=2;
 ctx.stroke();
 
-// EXPORT
-export.value=`Bond Report
-Price: ${r.price.toFixed(2)}
-Duration: ${r.dur.toFixed(2)}
-Convexity: ${r.conv.toFixed(2)}
-Insight: ${generateInsight(r)}
-`;
-
 }
 
 // PORTFOLIO
-let portfolio=[];
-
 function addBond(){
 portfolio.push({
 F:+face.value,
 c:+coupon.value/100,
-y:+yield.value/100,
+y:+yieldEl.value/100,
 n:+years.value,
 pos:+pos.value
 });
@@ -250,12 +244,19 @@ let total=0;
 
 portfolio.forEach(b=>{
 let r=calc(b.F,b.c,b.y,b.n);
-let pnl=b.pos*(-r.mod*0.01);
-total+=pnl;
+total+=b.pos*(-r.mod*0.01);
 });
 
-portfolioOutput.innerText="Portfolio P/L (100bps): "+total.toFixed(0);
+document.getElementById("portfolioOutput").textContent=
+"Portfolio P/L (100bps): "+total.toFixed(0);
 }
+
+// EVENTS
+document.getElementById("runBtn").addEventListener("click",run);
+document.getElementById("addBtn").addEventListener("click",addBond);
+document.getElementById("portfolioBtn").addEventListener("click",runPortfolio);
+
+});
 
 </script>
 
