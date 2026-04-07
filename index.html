@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BondStats V5 – Risk Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;font-family:Arial;background:#0b1220;color:white}
+.container{display:grid;grid-template-columns:320px 1fr;height:100vh}
+.sidebar{background:#111827;padding:20px}
+.main{padding:20px}
+input,button{width:100%;padding:10px;margin-bottom:10px;background:#020617;color:white;border:none}
+button{background:#2563eb;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card{background:#020617;padding:15px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+td,th{border:1px solid #1f2937;padding:8px}
+canvas{background:#020617;margin-top:15px}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+
+<h3>Bond Setup</h3>
+<input id="face" value="1000">
+<input id="coupon" value="5">
+<input id="yield" value="4">
+<input id="years" value="10">
+<input id="pos" value="100000">
+
+<button onclick="run()">Run</button>
+<button onclick="save()">Save</button>
+<button onclick="load()">Load</button>
+
+<hr>
+
+<h3>Portfolio</h3>
+<button onclick="add()">Add Bond</button>
+<button onclick="portfolio()">Run Portfolio</button>
+
+</div>
+
+<div class="main">
+
+<div class="grid">
+<div class="card"><b>Price</b><div id="price"></div></div>
+<div class="card"><b>Duration</b><div id="dur"></div></div>
+<div class="card"><b>Mod Duration</b><div id="mod"></div></div>
+<div class="card"><b>Convexity</b><div id="conv"></div></div>
+</div>
+
+<canvas id="chart" width="800" height="250"></canvas>
+
+<table>
+<thead><tr><th>Shock</th><th>%</th><th>P/L</th></tr></thead>
+<tbody id="table"></tbody>
+</table>
+
+<h3>Portfolio Output</h3>
+<div id="port"></div>
+
+<textarea id="export" style="width:100%;height:150px;margin-top:10px;background:#020617;color:white"></textarea>
+
+</div>
+
+</div>
+
+<script>
+
+let portfolioStore=[];
+
+function calc(F,c,y,n){
+let price=0,dur=0,conv=0;
+
+for(let t=1;t<=n;t++){
+let cf=F*c;
+if(t==n)cf+=F;
+
+let pv=cf/Math.pow(1+y,t);
+
+price+=pv;
+dur+=t*pv;
+conv+=t*(t+1)*pv;
+}
+
+dur/=price;
+let mod=dur/(1+y);
+conv=conv/(price*Math.pow(1+y,2));
+
+return{price,dur,mod,conv};
+}
+
+function run(){
+
+let F=+face.value;
+let c=+coupon.value/100;
+let y=+yield.value/100;
+let n=+years.value;
+let pos=+pos.value;
+
+let r=calc(F,c,y,n);
+
+price.innerText=r.price.toFixed(2);
+dur.innerText=r.dur.toFixed(2);
+mod.innerText=r.mod.toFixed(2);
+conv.innerText=r.conv.toFixed(2);
+
+let shocks=[-200,-100,-50,-25,25,50,100,200];
+table.innerHTML="";
+
+let pts=[];
+
+shocks.forEach(s=>{
+let dy=s/10000;
+let change=(-r.mod*dy+0.5*r.conv*dy*dy);
+let pnl=pos*change;
+
+pts.push(change);
+
+table.innerHTML+=`<tr><td>${s}</td><td>${(change*100).toFixed(2)}%</td><td>${pnl.toFixed(0)}</td></tr>`;
+});
+
+draw(pts);
+
+export.value=`Bond Analysis
+Price: ${r.price.toFixed(2)}
+Duration: ${r.dur.toFixed(2)}
+Convexity: ${r.conv.toFixed(2)}
+`;
+
+}
+
+function draw(pts){
+let ctx=chart.getContext("2d");
+ctx.clearRect(0,0,800,250);
+
+ctx.beginPath();
+
+pts.forEach((p,i)=>{
+let x=i*(800/pts.length);
+let y=125-p*2000;
+
+if(i==0)ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+});
+
+ctx.strokeStyle="cyan";
+ctx.stroke();
+}
+
+function save(){
+localStorage.setItem("bond",JSON.stringify({
+face:face.value,coupon:coupon.value,yield:yield.value,years:years.value,pos:pos.value
+}));
+}
+
+function load(){
+let d=JSON.parse(localStorage.getItem("bond"));
+if(!d)return;
+face.value=d.face;
+coupon.value=d.coupon;
+yield.value=d.yield;
+years.value=d.years;
+pos.value=d.pos;
+}
+
+function add(){
+portfolioStore.push({
+face:+face.value,
+coupon:+coupon.value/100,
+yield:+yield.value/100,
+years:+years.value,
+pos:+pos.value
+});
+}
+
+function portfolio(){
+
+let total=0;
+
+portfolioStore.forEach(b=>{
+let r=calc(b.face,b.coupon,b.yield,b.years);
+let pnl=b.pos*(-r.mod*0.01);
+total+=pnl;
+});
+
+port.innerText="Portfolio P/L (100bps): "+total.toFixed(0);
+
+}
+
+</script>
+
+</body>
+</html>
