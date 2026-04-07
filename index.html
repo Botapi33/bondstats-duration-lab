@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BondStats Duration Lab (Premium)</title>
+<title>BondStats Duration Lab</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -13,7 +13,7 @@ body{margin:0;font-family:-apple-system,Arial;background:#0b1220;color:#fff}
 
 h2{margin-top:0}
 
-input,button,textarea{
+input,button{
 width:100%;
 padding:12px;
 margin-bottom:10px;
@@ -22,7 +22,6 @@ border-radius:8px;
 }
 
 input{background:#020617;color:#fff}
-textarea{background:#020617;color:#fff;height:120px}
 
 button{
 background:linear-gradient(90deg,#2563eb,#3b82f6);
@@ -69,6 +68,23 @@ background:#020617;
 margin-top:20px;
 border-radius:10px;
 }
+
+/* PORTFOLIO */
+.portfolio-item{
+background:#020617;
+padding:10px;
+margin-bottom:8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-radius:8px;
+}
+
+.delete-btn{
+background:#ef4444;
+padding:6px 10px;
+width:auto;
+}
 </style>
 </head>
 
@@ -80,19 +96,10 @@ border-radius:10px;
 
 <h2>Duration Lab</h2>
 
-<label>Face Value</label>
 <input id="face" value="1000">
-
-<label>Coupon (%)</label>
 <input id="coupon" value="5">
-
-<label>Yield (%)</label>
 <input id="yield" value="4">
-
-<label>Maturity</label>
 <input id="years" value="10">
-
-<label>Position ($)</label>
 <input id="pos" value="100000">
 
 <button id="runBtn">Run Analysis</button>
@@ -103,8 +110,7 @@ border-radius:10px;
 <button id="addBtn">Add Bond</button>
 <button id="portfolioBtn">Run Portfolio</button>
 
-<h3>Export</h3>
-<button id="exportBtn">Generate Report</button>
+<div id="portfolioList"></div>
 
 </div>
 
@@ -117,15 +123,13 @@ border-radius:10px;
 <div class="card"><div>Convexity</div><div id="conv" class="value">-</div></div>
 </div>
 
-<div id="insight" class="insight">
-Run analysis to generate insight...
-</div>
+<div id="insight" class="insight">Run analysis...</div>
 
 <canvas id="chart" width="900" height="250"></canvas>
 
 <table>
 <thead>
-<tr><th>Shock</th><th>% Change</th><th>P/L</th></tr>
+<tr><th>Shock</th><th>%</th><th>P/L</th></tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
@@ -133,21 +137,33 @@ Run analysis to generate insight...
 <h3>Portfolio Output</h3>
 <div id="portfolioOutput"></div>
 
-<h3>Export Report</h3>
-<textarea id="report"></textarea>
-
 </div>
 
 </div>
 
 <script>
 
-const runBtn=document.getElementById("runBtn");
-const addBtn=document.getElementById("addBtn");
-const portfolioBtn=document.getElementById("portfolioBtn");
-const exportBtn=document.getElementById("exportBtn");
+document.addEventListener("DOMContentLoaded", function(){
 
 let portfolio=[];
+
+const face=document.getElementById("face");
+const coupon=document.getElementById("coupon");
+const yieldEl=document.getElementById("yield");
+const years=document.getElementById("years");
+const pos=document.getElementById("pos");
+
+const price=document.getElementById("price");
+const dur=document.getElementById("dur");
+const mod=document.getElementById("mod");
+const conv=document.getElementById("conv");
+const insight=document.getElementById("insight");
+
+const table=document.getElementById("table");
+const chart=document.getElementById("chart");
+
+const portfolioList=document.getElementById("portfolioList");
+const portfolioOutput=document.getElementById("portfolioOutput");
 
 // CALC
 function calc(F,c,y,n){
@@ -172,10 +188,10 @@ return {price,dur,mod,conv};
 }
 
 // INSIGHT
-function insight(r){
-if(r.mod>8) return "Very high interest rate risk. Large volatility expected.";
-if(r.mod>5) return "Moderate risk profile with noticeable sensitivity.";
-return "Low risk bond. Stable under rate changes.";
+function getInsight(r){
+if(r.mod>8) return "High interest rate sensitivity";
+if(r.mod>5) return "Moderate sensitivity";
+return "Low sensitivity";
 }
 
 // RUN
@@ -183,7 +199,7 @@ function run(){
 
 let F=+face.value;
 let c=+coupon.value/100;
-let y=+yield.value/100;
+let y=+yieldEl.value/100;
 let n=+years.value;
 let p=+pos.value;
 
@@ -194,8 +210,9 @@ dur.textContent=r.dur.toFixed(2);
 mod.textContent=r.mod.toFixed(2);
 conv.textContent=r.conv.toFixed(2);
 
-document.getElementById("insight").textContent=insight(r);
+insight.textContent=getInsight(r);
 
+// TABLE
 let shocks=[-200,-100,-50,-25,25,50,100,200];
 table.innerHTML="";
 let pts=[];
@@ -215,7 +232,7 @@ table.innerHTML+=`
 </tr>`;
 });
 
-// chart
+// CHART
 let ctx=chart.getContext("2d");
 ctx.clearRect(0,0,900,250);
 ctx.beginPath();
@@ -231,47 +248,75 @@ else ctx.lineTo(x,y);
 ctx.strokeStyle="cyan";
 ctx.stroke();
 
-window.lastResult={r,p};
-
 }
 
-// PORTFOLIO
+// ADD BOND
 function addBond(){
-portfolio.push(window.lastResult);
+
+let F=+face.value;
+let c=+coupon.value/100;
+let y=+yieldEl.value/100;
+let n=+years.value;
+let p=+pos.value;
+
+portfolio.push({F,c,y,n,p});
+
+renderPortfolio();
 }
 
+// RENDER
+function renderPortfolio(){
+
+portfolioList.innerHTML="";
+
+portfolio.forEach((b,i)=>{
+let div=document.createElement("div");
+div.className="portfolio-item";
+
+div.innerHTML=`
+<span>Bond ${i+1} | $${b.p}</span>
+<button class="delete-btn" data-id="${i}">X</button>
+`;
+
+portfolioList.appendChild(div);
+});
+
+// delete
+document.querySelectorAll(".delete-btn").forEach(btn=>{
+btn.addEventListener("click",function(){
+let id=this.getAttribute("data-id");
+portfolio.splice(id,1);
+renderPortfolio();
+});
+});
+
+}
+
+// RUN PORTFOLIO
 function runPortfolio(){
+
+if(portfolio.length===0){
+alert("No bonds added");
+return;
+}
+
 let total=0;
 
 portfolio.forEach(b=>{
-total+=b.p*(-b.r.mod*0.01);
+let r=calc(b.F,b.c,b.y,b.n);
+total+=b.p*(-r.mod*0.01);
 });
 
-portfolioOutput.textContent="Portfolio P/L (100bps): "+total.toFixed(0);
-}
-
-// EXPORT
-function exportReport(){
-if(!window.lastResult) return;
-
-let r=window.lastResult.r;
-
-report.value=`Bond Duration Report
-
-Price: ${r.price.toFixed(2)}
-Duration: ${r.dur.toFixed(2)}
-Convexity: ${r.conv.toFixed(2)}
-
-Insight:
-${insight(r)}
-`;
+portfolioOutput.textContent=
+"Portfolio P/L (100bps): "+total.toFixed(0);
 }
 
 // EVENTS
-runBtn.addEventListener("click",run);
-addBtn.addEventListener("click",addBond);
-portfolioBtn.addEventListener("click",runPortfolio);
-exportBtn.addEventListener("click",exportReport);
+document.getElementById("runBtn").addEventListener("click",run);
+document.getElementById("addBtn").addEventListener("click",addBond);
+document.getElementById("portfolioBtn").addEventListener("click",runPortfolio);
+
+});
 
 </script>
 
