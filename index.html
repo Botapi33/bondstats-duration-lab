@@ -6,33 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-margin:0;
-font-family:-apple-system,Arial;
-background:#0b1220;
-color:#fff;
-}
+body{margin:0;font-family:-apple-system,Arial;background:#0b1220;color:#fff}
+.container{display:grid;grid-template-columns:360px 1fr;height:100vh}
 
-.container{
-display:grid;
-grid-template-columns:360px 1fr;
-height:100vh;
-}
-
-.sidebar{
-background:#111827;
-padding:20px;
-border-right:1px solid #1f2937;
-}
-
-.main{
-padding:25px;
-overflow:auto;
-}
-
-h2,h3{
-margin-top:0;
-}
+.sidebar{background:#111827;padding:20px;border-right:1px solid #1f2937}
+.main{padding:25px;overflow:auto}
 
 input,button{
 width:100%;
@@ -42,22 +20,16 @@ border:none;
 border-radius:10px;
 }
 
-input{
-background:#020617;
-color:#fff;
-}
+input{background:#020617;color:#fff}
 
 button{
 background:linear-gradient(90deg,#2563eb,#3b82f6);
 color:white;
 font-weight:bold;
 cursor:pointer;
-transition:0.2s;
 }
 
-button:hover{
-transform:scale(1.02);
-}
+button:hover{opacity:0.9}
 
 .premium-btn{
 background:linear-gradient(90deg,#7c3aed,#a78bfa);
@@ -83,21 +55,9 @@ border-radius:12px;
 border:1px solid #1f2937;
 }
 
-.label{
-font-size:12px;
-color:#9ca3af;
-}
-
-.value{
-font-size:22px;
-font-weight:bold;
-margin-top:5px;
-}
-
-.unit{
-font-size:11px;
-color:#6b7280;
-}
+.label{font-size:12px;color:#9ca3af}
+.value{font-size:22px;font-weight:bold;margin-top:5px}
+.unit{font-size:11px;color:#6b7280}
 
 .insight{
 background:#111827;
@@ -195,7 +155,7 @@ border-radius:10px;
 <hr>
 
 <h3>Upgrade</h3>
-<button class="premium-btn">Unlock Premium ($9)</button>
+<button class="premium-btn" id="premiumBtn">Unlock Premium (€19)</button>
 
 </div>
 
@@ -254,9 +214,9 @@ Duration measures sensitivity. Convexity improves accuracy.
 </p>
 </div>
 
-<div class="section locked">
+<div class="section locked" id="portfolioSection">
 <h3>Portfolio Analysis (Premium)</h3>
-<div id="portfolioOutput">Unlock premium to access portfolio analytics</div>
+<div id="portfolioOutput">Upgrade to unlock portfolio analytics</div>
 </div>
 
 </div>
@@ -264,10 +224,15 @@ Duration measures sensitivity. Convexity improves accuracy.
 </div>
 
 <script>
-
 document.addEventListener("DOMContentLoaded",()=>{
 
 let portfolio=[];
+let isPremium=false;
+
+// ELEMENTS
+const premiumBtn=document.getElementById("premiumBtn");
+const portfolioSection=document.getElementById("portfolioSection");
+const portfolioOutput=document.getElementById("portfolioOutput");
 
 // INPUTS
 const face=document.getElementById("face");
@@ -287,11 +252,21 @@ const table=document.getElementById("table");
 const chart=document.getElementById("chart");
 
 const portfolioList=document.getElementById("portfolioList");
-const portfolioOutput=document.getElementById("portfolioOutput");
+
+// PREMIUM
+premiumBtn.onclick=()=>{
+isPremium=true;
+portfolioSection.classList.remove("locked");
+portfolioSection.style.opacity="1";
+
+premiumBtn.textContent="Premium Unlocked ✓";
+premiumBtn.style.background="#16a34a";
+
+portfolioOutput.textContent="Premium unlocked. Run analysis.";
+};
 
 // CALC
 function calc(F,c,y,n){
-
 let price=0,dur=0,conv=0;
 
 for(let t=1;t<=n;t++){
@@ -310,7 +285,6 @@ let mod=dur/(1+y);
 conv=conv/(price*Math.pow(1+y,2));
 
 return {price,dur,mod,conv};
-
 }
 
 // RUN
@@ -329,10 +303,8 @@ dur.textContent=r.dur.toFixed(2);
 mod.textContent=r.mod.toFixed(2);
 conv.textContent=r.conv.toFixed(2);
 
-insight.textContent=
-"Estimated move: "+r.mod.toFixed(2)+"% per 1% rate change";
+insight.textContent="Bond moves approx "+r.mod.toFixed(2)+"% per 1% rate move";
 
-// SCENARIOS
 let shocks=[-200,-100,-50,-25,25,50,100,200];
 table.innerHTML="";
 let pts=[];
@@ -352,7 +324,6 @@ table.innerHTML+=`
 </tr>`;
 });
 
-// CHART
 let ctx=chart.getContext("2d");
 ctx.clearRect(0,0,900,250);
 ctx.beginPath();
@@ -371,7 +342,6 @@ ctx.stroke();
 
 // ADD
 function addBond(){
-
 portfolio.push({
 F:+face.value,
 c:+coupon.value/100,
@@ -379,9 +349,7 @@ y:+yieldEl.value/100,
 n:+years.value,
 p:+pos.value
 });
-
 renderPortfolio();
-
 }
 
 // RENDER
@@ -390,7 +358,6 @@ function renderPortfolio(){
 portfolioList.innerHTML="";
 
 portfolio.forEach((b,i)=>{
-
 let div=document.createElement("div");
 div.className="portfolio-item";
 
@@ -400,10 +367,8 @@ div.innerHTML=`
 `;
 
 portfolioList.appendChild(div);
-
 });
 
-// DELETE
 document.querySelectorAll(".delete-btn").forEach(btn=>{
 btn.onclick=()=>{
 portfolio.splice(btn.dataset.id,1);
@@ -415,6 +380,11 @@ renderPortfolio();
 
 // ANALYZE
 function analyzePortfolio(){
+
+if(!isPremium){
+alert("Upgrade to Premium (€19) to unlock this feature");
+return;
+}
 
 if(portfolio.length===0){
 alert("Add bonds first");
@@ -428,8 +398,7 @@ let r=calc(b.F,b.c,b.y,b.n);
 total+=b.p*(-r.mod*0.01);
 });
 
-portfolioOutput.textContent=
-"Portfolio P/L (100bps): "+total.toFixed(0);
+portfolioOutput.textContent="Portfolio P/L (100bps): "+total.toFixed(0);
 
 }
 
