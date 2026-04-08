@@ -6,110 +6,211 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{margin:0;font-family:-apple-system,Arial;background:#0b1220;color:#fff}
-.container{display:grid;grid-template-columns:360px 1fr;height:100vh}
-
-.sidebar{background:#111827;padding:20px;border-right:1px solid #1f2937}
-.main{padding:25px;overflow:auto}
-
-input,button{
-width:100%;
-padding:12px;
-margin-bottom:8px;
-border:none;
-border-radius:10px;
+body{
+  margin:0;
+  font-family:-apple-system,Arial,sans-serif;
+  background:#0b1220;
+  color:#fff;
 }
-
-input{background:#020617;color:#fff}
-
+.container{
+  display:grid;
+  grid-template-columns:360px 1fr;
+  min-height:100vh;
+}
+.sidebar{
+  background:#111827;
+  padding:20px;
+  border-right:1px solid #1f2937;
+}
+.main{
+  padding:25px;
+  overflow:auto;
+}
+h2,h3,h4{
+  margin-top:0;
+}
+hr{
+  border:none;
+  border-top:1px solid #1f2937;
+  margin:18px 0;
+}
+input,button,textarea,select{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  border:none;
+  border-radius:10px;
+  box-sizing:border-box;
+  font:inherit;
+}
+input,select{
+  background:#020617;
+  color:#fff;
+}
+textarea{
+  background:#020617;
+  color:#fff;
+  min-height:160px;
+  resize:vertical;
+}
 button{
-background:linear-gradient(90deg,#2563eb,#3b82f6);
-color:white;
-font-weight:bold;
-cursor:pointer;
+  background:linear-gradient(90deg,#2563eb,#3b82f6);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
 }
-
-button:hover{opacity:0.9}
-
+button:hover{
+  opacity:0.92;
+}
 .premium-btn{
-background:linear-gradient(90deg,#7c3aed,#a78bfa);
+  background:linear-gradient(90deg,#7c3aed,#a78bfa);
 }
-
-.hint{
-font-size:12px;
-color:#9ca3af;
-margin-bottom:12px;
+.success-btn{
+  background:linear-gradient(90deg,#16a34a,#22c55e);
 }
-
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-margin-bottom:20px;
-}
-
-.card{
-background:#020617;
-padding:15px;
-border-radius:12px;
-border:1px solid #1f2937;
-}
-
-.label{font-size:12px;color:#9ca3af}
-.value{font-size:22px;font-weight:bold;margin-top:5px}
-.unit{font-size:11px;color:#6b7280}
-
-.insight{
-background:#111827;
-padding:15px;
-border-left:4px solid #3b82f6;
-margin-bottom:20px;
-border-radius:8px;
-}
-
-.section{
-background:#111827;
-padding:15px;
-margin-top:20px;
-border-radius:12px;
-border:1px solid #1f2937;
-}
-
-.portfolio-item{
-background:#020617;
-padding:10px;
-margin-bottom:8px;
-display:flex;
-justify-content:space-between;
-border-radius:8px;
-}
-
 .delete-btn{
-background:#ef4444;
-width:auto;
-padding:6px 10px;
+  background:#ef4444;
+  width:auto;
+  padding:6px 10px;
+  border-radius:8px;
 }
-
+.hint{
+  font-size:12px;
+  color:#9ca3af;
+  margin-bottom:12px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+.card{
+  background:#020617;
+  padding:15px;
+  border-radius:12px;
+  border:1px solid #1f2937;
+}
+.label{
+  font-size:12px;
+  color:#9ca3af;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.value{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:5px;
+}
+.unit{
+  font-size:11px;
+  color:#6b7280;
+  margin-top:6px;
+}
+.insight{
+  background:#111827;
+  padding:15px;
+  border-left:4px solid #3b82f6;
+  margin-bottom:20px;
+  border-radius:8px;
+  line-height:1.6;
+}
+.section{
+  background:#111827;
+  padding:15px;
+  margin-top:20px;
+  border-radius:12px;
+  border:1px solid #1f2937;
+}
+.section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.premium-chip{
+  display:inline-block;
+  font-size:11px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(124,58,237,0.18);
+  border:1px solid rgba(167,139,250,0.25);
+  color:#ddd6fe;
+  font-weight:700;
+}
 .locked{
-opacity:0.4;
+  opacity:0.42;
 }
-
 table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
 }
-
 td,th{
-border:1px solid #1f2937;
-padding:8px;
-text-align:center;
+  border:1px solid #1f2937;
+  padding:8px;
+  text-align:center;
 }
-
+th{
+  color:#cbd5e1;
+  background:#111827;
+}
 canvas{
-background:#020617;
-margin-top:20px;
-border-radius:10px;
+  background:#020617;
+  margin-top:20px;
+  border-radius:10px;
+  width:100%;
+  max-width:900px;
+}
+.portfolio-item,.saved-item{
+  background:#020617;
+  padding:10px;
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  border-radius:8px;
+}
+.item-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.small-btn{
+  width:auto;
+  padding:6px 10px;
+  border-radius:8px;
+}
+.empty{
+  color:#94a3b8;
+  font-size:14px;
+}
+.free-premium-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.plan-box{
+  background:#020617;
+  border:1px solid #1f2937;
+  border-radius:12px;
+  padding:14px;
+}
+.plan-box ul{
+  padding-left:18px;
+  margin:10px 0 0;
+  line-height:1.7;
+  color:#cbd5e1;
+}
+@media (max-width:1100px){
+  .container{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:700px){
+  .grid,.free-premium-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -118,294 +219,488 @@ border-radius:10px;
 
 <div class="container">
 
-<div class="sidebar">
+  <div class="sidebar">
 
-<h2>Duration Lab</h2>
+    <h2>Duration Lab</h2>
 
-<label>Face Value ($)</label>
-<input id="face" value="1000">
-<div class="hint">Nominal bond value</div>
+    <label>Face Value ($)</label>
+    <input id="face" value="1000">
+    <div class="hint">Nominal bond value, usually 100 or 1000</div>
 
-<label>Coupon Rate (%)</label>
-<input id="coupon" value="5">
-<div class="hint">Annual interest payment</div>
+    <label>Coupon Rate (%)</label>
+    <input id="coupon" value="5">
+    <div class="hint">Annual coupon paid by the bond</div>
 
-<label>Yield (%)</label>
-<input id="yield" value="4">
-<div class="hint">Market required return</div>
+    <label>Yield to Maturity (%)</label>
+    <input id="yield" value="4">
+    <div class="hint">Market yield required by investors</div>
 
-<label>Maturity (Years)</label>
-<input id="years" value="10">
-<div class="hint">Time until repayment</div>
+    <label>Maturity (Years)</label>
+    <input id="years" value="10">
+    <div class="hint">Years until repayment of principal</div>
 
-<label>Position ($)</label>
-<input id="pos" value="100000">
-<div class="hint">Investment size</div>
+    <label>Position Size ($)</label>
+    <input id="pos" value="100000">
+    <div class="hint">Investment amount used for P/L calculations</div>
 
-<button id="runBtn">Run Analysis</button>
+    <button id="runBtn">Run Analysis</button>
 
-<hr>
+    <hr>
 
-<h3>Portfolio</h3>
-<button id="addBtn">Add Bond</button>
-<button id="portfolioBtn">Analyze Portfolio</button>
+    <h3>Portfolio</h3>
+    <button id="addBtn">Add Bond</button>
+    <button id="portfolioBtn">Analyze Portfolio</button>
 
-<div id="portfolioList"></div>
+    <div id="portfolioList" class="empty">No bonds added yet</div>
 
-<hr>
+    <hr>
 
-<h3>Upgrade</h3>
-<button class="premium-btn" id="premiumBtn">Unlock Premium (€19)</button>
+    <h3>Saved Scenarios</h3>
+    <button id="saveScenarioBtn">Save Current Scenario</button>
+    <div id="savedList" class="empty">No saved scenarios yet</div>
 
-</div>
+    <hr>
 
-<div class="main">
+    <h3>Premium</h3>
+    <button class="premium-btn" id="premiumBtn">Unlock Premium (€19)</button>
+    <div class="hint">Premium unlocks portfolio insights, saved scenarios, export report, and advanced interpretation.</div>
 
-<div class="grid">
+  </div>
 
-<div class="card">
-<div class="label">Price</div>
-<div id="price" class="value">-</div>
-<div class="unit">USD</div>
-</div>
+  <div class="main">
 
-<div class="card">
-<div class="label">Duration</div>
-<div id="dur" class="value">-</div>
-<div class="unit">Years</div>
-</div>
+    <div class="grid">
 
-<div class="card">
-<div class="label">Mod Duration</div>
-<div id="mod" class="value">-</div>
-<div class="unit">% per 1% yield</div>
-</div>
+      <div class="card">
+        <div class="label">Price</div>
+        <div id="price" class="value">-</div>
+        <div class="unit">USD • Present value of bond cash flows</div>
+      </div>
 
-<div class="card">
-<div class="label">Convexity</div>
-<div id="conv" class="value">-</div>
-<div class="unit">Risk curvature</div>
-</div>
+      <div class="card">
+        <div class="label">Duration</div>
+        <div id="dur" class="value">-</div>
+        <div class="unit">Years • Weighted average timing of cash flows</div>
+      </div>
 
-</div>
+      <div class="card">
+        <div class="label">Modified Duration</div>
+        <div id="mod" class="value">-</div>
+        <div class="unit">% move for a 1% yield change</div>
+      </div>
 
-<div id="insight" class="insight">
-Run analysis to see bond sensitivity insights
-</div>
+      <div class="card">
+        <div class="label">Convexity</div>
+        <div id="conv" class="value">-</div>
+        <div class="unit">Curvature adjustment for larger moves</div>
+      </div>
 
-<canvas id="chart" width="900" height="250"></canvas>
+    </div>
 
-<table>
-<thead>
-<tr>
-<th>Shock (bps)</th>
-<th>Price Change</th>
-<th>P/L ($)</th>
-</tr>
-</thead>
-<tbody id="table"></tbody>
-</table>
+    <div id="insight" class="insight">
+      Run analysis to see bond sensitivity insights.
+    </div>
 
-<div class="section">
-<h3>What this tool does</h3>
-<p>
-This tool models how bond prices react to interest rate changes.
-Duration measures sensitivity. Convexity improves accuracy.
-</p>
-</div>
+    <canvas id="chart" width="900" height="250"></canvas>
 
-<div class="section locked" id="portfolioSection">
-<h3>Portfolio Analysis (Premium)</h3>
-<div id="portfolioOutput">Upgrade to unlock portfolio analytics</div>
-</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Shock (bps)</th>
+          <th>Price Change</th>
+          <th>P/L ($)</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
 
-</div>
+    <div class="section">
+      <div class="section-title">
+        <h3>How to Read the Results</h3>
+      </div>
+      <ul>
+        <li>Price shows the estimated bond value today.</li>
+        <li>Duration estimates how much the bond reacts to rate moves.</li>
+        <li>Modified Duration is the most practical risk measure for quick sensitivity.</li>
+        <li>Convexity improves the estimate when shocks become larger.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <h3>Free vs Premium</h3>
+      </div>
+      <div class="free-premium-grid">
+        <div class="plan-box">
+          <strong>Free</strong>
+          <ul>
+            <li>Single bond analysis</li>
+            <li>Scenario table</li>
+            <li>Chart</li>
+            <li>Basic insight</li>
+          </ul>
+        </div>
+        <div class="plan-box">
+          <strong>Premium</strong>
+          <ul>
+            <li>Portfolio analysis</li>
+            <li>Saved scenarios</li>
+            <li>Export report</li>
+            <li>Advanced insights</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section locked" id="portfolioSection">
+      <div class="section-title">
+        <h3>Portfolio Analysis</h3>
+        <span class="premium-chip">Premium</span>
+      </div>
+      <div id="portfolioOutput">Upgrade to unlock portfolio analytics</div>
+    </div>
+
+    <div class="section locked" id="advancedInsightSection">
+      <div class="section-title">
+        <h3>Advanced Insight</h3>
+        <span class="premium-chip">Premium</span>
+      </div>
+      <div id="advancedInsight">Upgrade to unlock analyst-style interpretation</div>
+    </div>
+
+    <div class="section locked" id="reportSection">
+      <div class="section-title">
+        <h3>Export Report</h3>
+        <span class="premium-chip">Premium</span>
+      </div>
+      <button id="reportBtn" class="success-btn">Generate Report</button>
+      <textarea id="reportBox">Upgrade to unlock report generation</textarea>
+    </div>
+
+  </div>
 
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-let portfolio=[];
-let isPremium=false;
+  let portfolio = [];
+  let savedScenarios = [];
+  let isPremium = false;
+  let lastSingleResult = null;
 
-// ELEMENTS
-const premiumBtn=document.getElementById("premiumBtn");
-const portfolioSection=document.getElementById("portfolioSection");
-const portfolioOutput=document.getElementById("portfolioOutput");
+  const premiumBtn = document.getElementById("premiumBtn");
+  const portfolioSection = document.getElementById("portfolioSection");
+  const advancedInsightSection = document.getElementById("advancedInsightSection");
+  const reportSection = document.getElementById("reportSection");
 
-// INPUTS
-const face=document.getElementById("face");
-const coupon=document.getElementById("coupon");
-const yieldEl=document.getElementById("yield");
-const years=document.getElementById("years");
-const pos=document.getElementById("pos");
+  const face = document.getElementById("face");
+  const coupon = document.getElementById("coupon");
+  const yieldEl = document.getElementById("yield");
+  const years = document.getElementById("years");
+  const pos = document.getElementById("pos");
 
-// OUTPUTS
-const price=document.getElementById("price");
-const dur=document.getElementById("dur");
-const mod=document.getElementById("mod");
-const conv=document.getElementById("conv");
-const insight=document.getElementById("insight");
+  const price = document.getElementById("price");
+  const dur = document.getElementById("dur");
+  const mod = document.getElementById("mod");
+  const conv = document.getElementById("conv");
+  const insight = document.getElementById("insight");
+  const advancedInsight = document.getElementById("advancedInsight");
 
-const table=document.getElementById("table");
-const chart=document.getElementById("chart");
+  const table = document.getElementById("table");
+  const chart = document.getElementById("chart");
+  const portfolioList = document.getElementById("portfolioList");
+  const portfolioOutput = document.getElementById("portfolioOutput");
+  const savedList = document.getElementById("savedList");
+  const reportBox = document.getElementById("reportBox");
 
-const portfolioList=document.getElementById("portfolioList");
+  function calc(F,c,y,n){
+    let price=0,dur=0,conv=0;
 
-// PREMIUM
-premiumBtn.onclick=()=>{
-isPremium=true;
-portfolioSection.classList.remove("locked");
-portfolioSection.style.opacity="1";
+    for(let t=1;t<=n;t++){
+      let cf=F*c;
+      if(t===n) cf+=F;
 
-premiumBtn.textContent="Premium Unlocked ✓";
-premiumBtn.style.background="#16a34a";
+      let pv=cf/Math.pow(1+y,t);
 
-portfolioOutput.textContent="Premium unlocked. Run analysis.";
-};
+      price+=pv;
+      dur+=t*pv;
+      conv+=t*(t+1)*pv;
+    }
 
-// CALC
-function calc(F,c,y,n){
-let price=0,dur=0,conv=0;
+    dur/=price;
+    let mod=dur/(1+y);
+    conv=conv/(price*Math.pow(1+y,2));
 
-for(let t=1;t<=n;t++){
-let cf=F*c;
-if(t===n) cf+=F;
+    return {price,dur,mod,conv};
+  }
 
-let pv=cf/Math.pow(1+y,t);
+  function getBasicInsight(r){
+    if(r.mod>8) return "High interest rate sensitivity. Large moves in yields can materially affect price.";
+    if(r.mod>5) return "Moderate rate sensitivity. Price reacts meaningfully to changing yields.";
+    return "Lower rate sensitivity. The bond is relatively more stable under yield changes.";
+  }
 
-price+=pv;
-dur+=t*pv;
-conv+=t*(t+1)*pv;
-}
+  function getAdvancedInsight(r){
+    if(r.mod>8 && r.conv>80){
+      return "This bond combines long duration with elevated convexity. In practice, it behaves like a high-sensitivity instrument where larger shocks create increasingly non-linear outcomes. This is the kind of bond that can deliver strong upside in rallies but also pronounced downside in rate repricing.";
+    }
+    if(r.mod>5){
+      return "This bond sits in the middle ground: it is sensitive enough for macro rate moves to matter, but not so extreme that every shift becomes destabilizing. It works well for directional views, but still requires active monitoring in volatile rate environments.";
+    }
+    return "This bond has a relatively contained duration profile. It may still react to rate shifts, but the expected price swings are smaller, making it more suitable for defensive positioning or lower-volatility allocations.";
+  }
 
-dur/=price;
-let mod=dur/(1+y);
-conv=conv/(price*Math.pow(1+y,2));
+  function currentInputs(){
+    return {
+      F:+face.value,
+      c:+coupon.value/100,
+      y:+yieldEl.value/100,
+      n:+years.value,
+      p:+pos.value
+    };
+  }
 
-return {price,dur,mod,conv};
-}
+  function drawChart(points){
+    const ctx = chart.getContext("2d");
+    const w = chart.width;
+    const h = chart.height;
 
-// RUN
-function run(){
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath();
 
-let F=+face.value;
-let c=+coupon.value/100;
-let y=+yieldEl.value/100;
-let n=+years.value;
-let p=+pos.value;
+    points.forEach((p,i)=>{
+      const x = i*(w/(points.length-1));
+      const y = h/2 - p*2000;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    });
 
-let r=calc(F,c,y,n);
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
 
-price.textContent=r.price.toFixed(2);
-dur.textContent=r.dur.toFixed(2);
-mod.textContent=r.mod.toFixed(2);
-conv.textContent=r.conv.toFixed(2);
+  function runAnalysis(){
+    const {F,c,y,n,p} = currentInputs();
+    const r = calc(F,c,y,n);
 
-insight.textContent="Bond moves approx "+r.mod.toFixed(2)+"% per 1% rate move";
+    price.textContent = r.price.toFixed(2);
+    dur.textContent = r.dur.toFixed(2);
+    mod.textContent = r.mod.toFixed(2);
+    conv.textContent = r.conv.toFixed(2);
 
-let shocks=[-200,-100,-50,-25,25,50,100,200];
-table.innerHTML="";
-let pts=[];
+    insight.textContent = getBasicInsight(r);
 
-shocks.forEach(s=>{
-let dy=s/10000;
-let change=(-r.mod*dy+0.5*r.conv*dy*dy);
-let pnl=p*change;
+    if(isPremium){
+      advancedInsight.textContent = getAdvancedInsight(r);
+    }
 
-pts.push(change);
+    const shocks=[-200,-100,-50,-25,25,50,100,200];
+    table.innerHTML = "";
+    let pts=[];
 
-table.innerHTML+=`
-<tr>
-<td>${s}</td>
-<td>${(change*100).toFixed(2)}%</td>
-<td>${pnl.toFixed(0)}</td>
-</tr>`;
-});
+    shocks.forEach(s=>{
+      const dy=s/10000;
+      const change=(-r.mod*dy+0.5*r.conv*dy*dy);
+      const pnl=p*change;
+      pts.push(change);
 
-let ctx=chart.getContext("2d");
-ctx.clearRect(0,0,900,250);
-ctx.beginPath();
+      table.innerHTML += `
+        <tr>
+          <td>${s}</td>
+          <td>${(change*100).toFixed(2)}%</td>
+          <td>${pnl.toFixed(0)}</td>
+        </tr>
+      `;
+    });
 
-pts.forEach((p,i)=>{
-let x=i*(900/pts.length);
-let y=125-p*2000;
-if(i===0) ctx.moveTo(x,y);
-else ctx.lineTo(x,y);
-});
+    drawChart(pts);
+    lastSingleResult = {inputs:{F,c,y,n,p}, result:r};
+  }
 
-ctx.strokeStyle="cyan";
-ctx.stroke();
+  function addBond(){
+    const {F,c,y,n,p} = currentInputs();
+    portfolio.push({F,c,y,n,p});
+    renderPortfolio();
+  }
 
-}
+  function renderPortfolio(){
+    if(portfolio.length===0){
+      portfolioList.innerHTML = '<div class="empty">No bonds added yet</div>';
+      return;
+    }
 
-// ADD
-function addBond(){
-portfolio.push({
-F:+face.value,
-c:+coupon.value/100,
-y:+yieldEl.value/100,
-n:+years.value,
-p:+pos.value
-});
-renderPortfolio();
-}
+    portfolioList.innerHTML = "";
 
-// RENDER
-function renderPortfolio(){
+    portfolio.forEach((b,i)=>{
+      const div=document.createElement("div");
+      div.className="portfolio-item";
+      div.innerHTML=`
+        <span>Bond ${i+1} | $${b.p.toFixed(0)} | ${b.n}Y | ${(b.c*100).toFixed(2)}%</span>
+        <div class="item-actions">
+          <button class="delete-btn small-btn" data-id="${i}">Delete</button>
+        </div>
+      `;
+      portfolioList.appendChild(div);
+    });
 
-portfolioList.innerHTML="";
+    document.querySelectorAll(".delete-btn").forEach(btn=>{
+      btn.onclick=()=>{
+        const idx = Number(btn.dataset.id);
+        portfolio.splice(idx,1);
+        renderPortfolio();
+      };
+    });
+  }
 
-portfolio.forEach((b,i)=>{
-let div=document.createElement("div");
-div.className="portfolio-item";
+  function analyzePortfolio(){
+    if(!isPremium){
+      alert("Upgrade to Premium (€19) to unlock this feature");
+      return;
+    }
 
-div.innerHTML=`
-<span>Bond ${i+1} | $${b.p}</span>
-<button class="delete-btn" data-id="${i}">X</button>
+    if(portfolio.length===0){
+      alert("Add bonds first");
+      return;
+    }
+
+    let totalValue=0;
+    let weightedMod=0;
+    let weightedConv=0;
+    let totalPnL=0;
+
+    portfolio.forEach(b=>{
+      const r=calc(b.F,b.c,b.y,b.n);
+      totalValue += b.p;
+      weightedMod += r.mod*b.p;
+      weightedConv += r.conv*b.p;
+      totalPnL += b.p*(-r.mod*0.01);
+    });
+
+    const avgMod = weightedMod/totalValue;
+    const avgConv = weightedConv/totalValue;
+    const dv01 = totalValue*avgMod*0.0001;
+
+    let risk = "Low";
+    if(avgMod>7) risk="High";
+    else if(avgMod>4) risk="Moderate";
+
+    portfolioOutput.innerHTML = `
+      Total Portfolio Value: $${totalValue.toFixed(0)}<br>
+      Weighted Modified Duration: ${avgMod.toFixed(2)}<br>
+      Weighted Convexity: ${avgConv.toFixed(2)}<br>
+      DV01: $${dv01.toFixed(2)}<br>
+      Estimated P/L (100bps): $${totalPnL.toFixed(0)}<br>
+      Risk Level: ${risk}
+    `;
+  }
+
+  function saveScenario(){
+    const {F,c,y,n,p} = currentInputs();
+    const label = `Bond ${savedScenarios.length+1} | ${n}Y | ${(c*100).toFixed(2)}%`;
+    savedScenarios.push({label,F,c,y,n,p});
+    renderSaved();
+  }
+
+  function renderSaved(){
+    if(savedScenarios.length===0){
+      savedList.innerHTML = '<div class="empty">No saved scenarios yet</div>';
+      return;
+    }
+
+    savedList.innerHTML = "";
+
+    savedScenarios.forEach((s,i)=>{
+      const div=document.createElement("div");
+      div.className="saved-item";
+      div.innerHTML=`
+        <span>${s.label}</span>
+        <div class="item-actions">
+          <button class="small-btn" data-load="${i}">Load</button>
+          <button class="delete-btn small-btn" data-del="${i}">Delete</button>
+        </div>
+      `;
+      savedList.appendChild(div);
+    });
+
+    document.querySelectorAll("[data-load]").forEach(btn=>{
+      btn.onclick=()=>{
+        const s = savedScenarios[Number(btn.dataset.load)];
+        face.value = s.F;
+        coupon.value = (s.c*100).toFixed(2);
+        yieldEl.value = (s.y*100).toFixed(2);
+        years.value = s.n;
+        pos.value = s.p;
+      };
+    });
+
+    document.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.onclick=()=>{
+        savedScenarios.splice(Number(btn.dataset.del),1);
+        renderSaved();
+      };
+    });
+  }
+
+  function generateReport(){
+    if(!isPremium){
+      alert("Upgrade to Premium (€19) to unlock report export");
+      return;
+    }
+
+    if(!lastSingleResult){
+      alert("Run analysis first");
+      return;
+    }
+
+    const r = lastSingleResult.result;
+    const i = lastSingleResult.inputs;
+
+    reportBox.value = 
+`Bond Duration Lab Report
+
+Face Value: $${i.F}
+Coupon Rate: ${(i.c*100).toFixed(2)}%
+Yield: ${(i.y*100).toFixed(2)}%
+Maturity: ${i.n} years
+Position: $${i.p.toFixed(0)}
+
+Price: ${r.price.toFixed(2)}
+Duration: ${r.dur.toFixed(2)}
+Modified Duration: ${r.mod.toFixed(2)}
+Convexity: ${r.conv.toFixed(2)}
+
+Basic Insight:
+${getBasicInsight(r)}
+
+Advanced Insight:
+${getAdvancedInsight(r)}
+
+Portfolio Snapshot:
+${portfolioOutput.innerText || "No portfolio analysis run"}
 `;
+  }
 
-portfolioList.appendChild(div);
-});
+  premiumBtn.onclick=()=>{
+    isPremium=true;
 
-document.querySelectorAll(".delete-btn").forEach(btn=>{
-btn.onclick=()=>{
-portfolio.splice(btn.dataset.id,1);
-renderPortfolio();
-};
-});
+    portfolioSection.classList.remove("locked");
+    advancedInsightSection.classList.remove("locked");
+    reportSection.classList.remove("locked");
 
-}
+    premiumBtn.textContent="Premium Unlocked ✓";
+    premiumBtn.style.background="#16a34a";
 
-// ANALYZE
-function analyzePortfolio(){
+    advancedInsight.textContent="Run analysis to generate advanced interpretation";
+    reportBox.value="Run analysis, then click Generate Report";
+  };
 
-if(!isPremium){
-alert("Upgrade to Premium (€19) to unlock this feature");
-return;
-}
-
-if(portfolio.length===0){
-alert("Add bonds first");
-return;
-}
-
-let total=0;
-
-portfolio.forEach(b=>{
-let r=calc(b.F,b.c,b.y,b.n);
-total+=b.p*(-r.mod*0.01);
-});
-
-portfolioOutput.textContent="Portfolio P/L (100bps): "+total.toFixed(0);
-
-}
-
-// EVENTS
-document.getElementById("runBtn").onclick=run;
-document.getElementById("addBtn").onclick=addBond;
-document.getElementById("portfolioBtn").onclick=analyzePortfolio;
+  document.getElementById("runBtn").onclick = runAnalysis;
+  document.getElementById("addBtn").onclick = addBond;
+  document.getElementById("portfolioBtn").onclick = analyzePortfolio;
+  document.getElementById("saveScenarioBtn").onclick = saveScenario;
+  document.getElementById("reportBtn").onclick = generateReport;
 
 });
 </script>
