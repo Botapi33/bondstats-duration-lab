@@ -205,6 +205,9 @@ canvas{
   line-height:1.7;
   color:#cbd5e1;
 }
+a.button-link{
+  text-decoration:none;
+}
 @media (max-width:1100px){
   .container{grid-template-columns:1fr}
   .grid{grid-template-columns:repeat(2,1fr)}
@@ -248,22 +251,26 @@ canvas{
     <hr>
 
     <h3>Portfolio</h3>
+    <div class="hint">Available in Premium</div>
     <button id="addBtn">Add Bond</button>
     <button id="portfolioBtn">Analyze Portfolio</button>
 
-    <div id="portfolioList" class="empty">No bonds added yet</div>
+    <div id="portfolioList" class="empty">Portfolio tools are available in Premium</div>
 
     <hr>
 
     <h3>Saved Scenarios</h3>
+    <div class="hint">Available in Premium</div>
     <button id="saveScenarioBtn">Save Current Scenario</button>
-    <div id="savedList" class="empty">No saved scenarios yet</div>
+    <div id="savedList" class="empty">Saved scenarios are available in Premium</div>
 
     <hr>
 
-    <h3>Premium</h3>
-    <button class="premium-btn" id="premiumBtn">Unlock Premium (€19)</button>
-    <div class="hint">Premium unlocks portfolio insights, saved scenarios, export report, and advanced interpretation.</div>
+    <h3>Upgrade</h3>
+    <a class="button-link" href="https://buy.stripe.com/9B66oIcZB3Mp7gy2dc4wM02" target="_blank" rel="noopener noreferrer">
+      <button class="premium-btn" id="premiumBtn">Unlock Premium (€19)</button>
+    </a>
+    <div class="hint">Premium unlocks portfolio analysis, saved scenarios, export report, and advanced interpretation.</div>
 
   </div>
 
@@ -374,7 +381,7 @@ canvas{
         <span class="premium-chip">Premium</span>
       </div>
       <button id="reportBtn" class="success-btn">Generate Report</button>
-      <textarea id="reportBox">Upgrade to unlock report generation</textarea>
+      <textarea id="reportBox" readonly>Upgrade to unlock report generation</textarea>
     </div>
 
   </div>
@@ -384,15 +391,7 @@ canvas{
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-  let portfolio = [];
-  let savedScenarios = [];
-  let isPremium = false;
   let lastSingleResult = null;
-
-  const premiumBtn = document.getElementById("premiumBtn");
-  const portfolioSection = document.getElementById("portfolioSection");
-  const advancedInsightSection = document.getElementById("advancedInsightSection");
-  const reportSection = document.getElementById("reportSection");
 
   const face = document.getElementById("face");
   const coupon = document.getElementById("coupon");
@@ -405,14 +404,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   const mod = document.getElementById("mod");
   const conv = document.getElementById("conv");
   const insight = document.getElementById("insight");
-  const advancedInsight = document.getElementById("advancedInsight");
 
   const table = document.getElementById("table");
   const chart = document.getElementById("chart");
-  const portfolioList = document.getElementById("portfolioList");
-  const portfolioOutput = document.getElementById("portfolioOutput");
-  const savedList = document.getElementById("savedList");
-  const reportBox = document.getElementById("reportBox");
 
   function calc(F,c,y,n){
     let price=0,dur=0,conv=0;
@@ -441,26 +435,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     return "Lower rate sensitivity. The bond is relatively more stable under yield changes.";
   }
 
-  function getAdvancedInsight(r){
-    if(r.mod>8 && r.conv>80){
-      return "This bond combines long duration with elevated convexity. In practice, it behaves like a high-sensitivity instrument where larger shocks create increasingly non-linear outcomes. This is the kind of bond that can deliver strong upside in rallies but also pronounced downside in rate repricing.";
-    }
-    if(r.mod>5){
-      return "This bond sits in the middle ground: it is sensitive enough for macro rate moves to matter, but not so extreme that every shift becomes destabilizing. It works well for directional views, but still requires active monitoring in volatile rate environments.";
-    }
-    return "This bond has a relatively contained duration profile. It may still react to rate shifts, but the expected price swings are smaller, making it more suitable for defensive positioning or lower-volatility allocations.";
-  }
-
-  function currentInputs(){
-    return {
-      F:+face.value,
-      c:+coupon.value/100,
-      y:+yieldEl.value/100,
-      n:+years.value,
-      p:+pos.value
-    };
-  }
-
   function drawChart(points){
     const ctx = chart.getContext("2d");
     const w = chart.width;
@@ -482,7 +456,12 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   function runAnalysis(){
-    const {F,c,y,n,p} = currentInputs();
+    const F = +face.value;
+    const c = +coupon.value/100;
+    const y = +yieldEl.value/100;
+    const n = +years.value;
+    const p = +pos.value;
+
     const r = calc(F,c,y,n);
 
     price.textContent = r.price.toFixed(2);
@@ -491,10 +470,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     conv.textContent = r.conv.toFixed(2);
 
     insight.textContent = getBasicInsight(r);
-
-    if(isPremium){
-      advancedInsight.textContent = getAdvancedInsight(r);
-    }
 
     const shocks=[-200,-100,-50,-25,25,50,100,200];
     table.innerHTML = "";
@@ -519,188 +494,23 @@ document.addEventListener("DOMContentLoaded",()=>{
     lastSingleResult = {inputs:{F,c,y,n,p}, result:r};
   }
 
-  function addBond(){
-    const {F,c,y,n,p} = currentInputs();
-    portfolio.push({F,c,y,n,p});
-    renderPortfolio();
-  }
+  document.getElementById("runBtn").onclick = runAnalysis;
 
-  function renderPortfolio(){
-    if(portfolio.length===0){
-      portfolioList.innerHTML = '<div class="empty">No bonds added yet</div>';
-      return;
-    }
-
-    portfolioList.innerHTML = "";
-
-    portfolio.forEach((b,i)=>{
-      const div=document.createElement("div");
-      div.className="portfolio-item";
-      div.innerHTML=`
-        <span>Bond ${i+1} | $${b.p.toFixed(0)} | ${b.n}Y | ${(b.c*100).toFixed(2)}%</span>
-        <div class="item-actions">
-          <button class="delete-btn small-btn" data-id="${i}">Delete</button>
-        </div>
-      `;
-      portfolioList.appendChild(div);
-    });
-
-    document.querySelectorAll(".delete-btn").forEach(btn=>{
-      btn.onclick=()=>{
-        const idx = Number(btn.dataset.id);
-        portfolio.splice(idx,1);
-        renderPortfolio();
-      };
-    });
-  }
-
-  function analyzePortfolio(){
-    if(!isPremium){
-      alert("Upgrade to Premium (€19) to unlock this feature");
-      return;
-    }
-
-    if(portfolio.length===0){
-      alert("Add bonds first");
-      return;
-    }
-
-    let totalValue=0;
-    let weightedMod=0;
-    let weightedConv=0;
-    let totalPnL=0;
-
-    portfolio.forEach(b=>{
-      const r=calc(b.F,b.c,b.y,b.n);
-      totalValue += b.p;
-      weightedMod += r.mod*b.p;
-      weightedConv += r.conv*b.p;
-      totalPnL += b.p*(-r.mod*0.01);
-    });
-
-    const avgMod = weightedMod/totalValue;
-    const avgConv = weightedConv/totalValue;
-    const dv01 = totalValue*avgMod*0.0001;
-
-    let risk = "Low";
-    if(avgMod>7) risk="High";
-    else if(avgMod>4) risk="Moderate";
-
-    portfolioOutput.innerHTML = `
-      Total Portfolio Value: $${totalValue.toFixed(0)}<br>
-      Weighted Modified Duration: ${avgMod.toFixed(2)}<br>
-      Weighted Convexity: ${avgConv.toFixed(2)}<br>
-      DV01: $${dv01.toFixed(2)}<br>
-      Estimated P/L (100bps): $${totalPnL.toFixed(0)}<br>
-      Risk Level: ${risk}
-    `;
-  }
-
-  function saveScenario(){
-    const {F,c,y,n,p} = currentInputs();
-    const label = `Bond ${savedScenarios.length+1} | ${n}Y | ${(c*100).toFixed(2)}%`;
-    savedScenarios.push({label,F,c,y,n,p});
-    renderSaved();
-  }
-
-  function renderSaved(){
-    if(savedScenarios.length===0){
-      savedList.innerHTML = '<div class="empty">No saved scenarios yet</div>';
-      return;
-    }
-
-    savedList.innerHTML = "";
-
-    savedScenarios.forEach((s,i)=>{
-      const div=document.createElement("div");
-      div.className="saved-item";
-      div.innerHTML=`
-        <span>${s.label}</span>
-        <div class="item-actions">
-          <button class="small-btn" data-load="${i}">Load</button>
-          <button class="delete-btn small-btn" data-del="${i}">Delete</button>
-        </div>
-      `;
-      savedList.appendChild(div);
-    });
-
-    document.querySelectorAll("[data-load]").forEach(btn=>{
-      btn.onclick=()=>{
-        const s = savedScenarios[Number(btn.dataset.load)];
-        face.value = s.F;
-        coupon.value = (s.c*100).toFixed(2);
-        yieldEl.value = (s.y*100).toFixed(2);
-        years.value = s.n;
-        pos.value = s.p;
-      };
-    });
-
-    document.querySelectorAll("[data-del]").forEach(btn=>{
-      btn.onclick=()=>{
-        savedScenarios.splice(Number(btn.dataset.del),1);
-        renderSaved();
-      };
-    });
-  }
-
-  function generateReport(){
-    if(!isPremium){
-      alert("Upgrade to Premium (€19) to unlock report export");
-      return;
-    }
-
-    if(!lastSingleResult){
-      alert("Run analysis first");
-      return;
-    }
-
-    const r = lastSingleResult.result;
-    const i = lastSingleResult.inputs;
-
-    reportBox.value = 
-`Bond Duration Lab Report
-
-Face Value: $${i.F}
-Coupon Rate: ${(i.c*100).toFixed(2)}%
-Yield: ${(i.y*100).toFixed(2)}%
-Maturity: ${i.n} years
-Position: $${i.p.toFixed(0)}
-
-Price: ${r.price.toFixed(2)}
-Duration: ${r.dur.toFixed(2)}
-Modified Duration: ${r.mod.toFixed(2)}
-Convexity: ${r.conv.toFixed(2)}
-
-Basic Insight:
-${getBasicInsight(r)}
-
-Advanced Insight:
-${getAdvancedInsight(r)}
-
-Portfolio Snapshot:
-${portfolioOutput.innerText || "No portfolio analysis run"}
-`;
-  }
-
-  premiumBtn.onclick=()=>{
-    isPremium=true;
-
-    portfolioSection.classList.remove("locked");
-    advancedInsightSection.classList.remove("locked");
-    reportSection.classList.remove("locked");
-
-    premiumBtn.textContent="Premium Unlocked ✓";
-    premiumBtn.style.background="#16a34a";
-
-    advancedInsight.textContent="Run analysis to generate advanced interpretation";
-    reportBox.value="Run analysis, then click Generate Report";
+  document.getElementById("addBtn").onclick = ()=>{
+    alert("Upgrade to Premium (€19) to unlock portfolio tools");
   };
 
-  document.getElementById("runBtn").onclick = runAnalysis;
-  document.getElementById("addBtn").onclick = addBond;
-  document.getElementById("portfolioBtn").onclick = analyzePortfolio;
-  document.getElementById("saveScenarioBtn").onclick = saveScenario;
-  document.getElementById("reportBtn").onclick = generateReport;
+  document.getElementById("portfolioBtn").onclick = ()=>{
+    alert("Upgrade to Premium (€19) to unlock portfolio analytics");
+  };
+
+  document.getElementById("saveScenarioBtn").onclick = ()=>{
+    alert("Upgrade to Premium (€19) to save scenarios");
+  };
+
+  document.getElementById("reportBtn").onclick = ()=>{
+    alert("Upgrade to Premium (€19) to export reports");
+  };
 
 });
 </script>
