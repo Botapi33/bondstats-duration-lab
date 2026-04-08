@@ -6,30 +6,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{margin:0;font-family:-apple-system,Arial;background:#0b1220;color:#fff}
-.container{display:grid;grid-template-columns:340px 1fr;height:100vh}
-.sidebar{background:#111827;padding:20px}
-.main{padding:20px;overflow:auto}
+body{
+margin:0;
+font-family:-apple-system,Arial;
+background:#0b1220;
+color:#fff;
+}
+
+.container{
+display:grid;
+grid-template-columns:360px 1fr;
+height:100vh;
+}
+
+.sidebar{
+background:#111827;
+padding:20px;
+border-right:1px solid #1f2937;
+}
+
+.main{
+padding:25px;
+overflow:auto;
+}
+
+h2,h3{
+margin-top:0;
+}
 
 input,button{
 width:100%;
 padding:12px;
-margin-bottom:10px;
+margin-bottom:8px;
 border:none;
-border-radius:8px;
+border-radius:10px;
 }
 
-input{background:#020617;color:#fff}
+input{
+background:#020617;
+color:#fff;
+}
 
 button{
 background:linear-gradient(90deg,#2563eb,#3b82f6);
 color:white;
-cursor:pointer;
 font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:scale(1.02);
 }
 
 .premium-btn{
 background:linear-gradient(90deg,#7c3aed,#a78bfa);
+}
+
+.hint{
+font-size:12px;
+color:#9ca3af;
+margin-bottom:12px;
 }
 
 .grid{
@@ -42,25 +79,40 @@ margin-bottom:20px;
 .card{
 background:#020617;
 padding:15px;
-border-radius:10px;
+border-radius:12px;
+border:1px solid #1f2937;
 }
 
-.label{font-size:12px;color:#9ca3af}
-.value{font-size:22px;font-weight:bold}
-.unit{font-size:12px;color:#9ca3af}
+.label{
+font-size:12px;
+color:#9ca3af;
+}
+
+.value{
+font-size:22px;
+font-weight:bold;
+margin-top:5px;
+}
+
+.unit{
+font-size:11px;
+color:#6b7280;
+}
 
 .insight{
 background:#111827;
 padding:15px;
 border-left:4px solid #3b82f6;
 margin-bottom:20px;
+border-radius:8px;
 }
 
 .section{
 background:#111827;
 padding:15px;
 margin-top:20px;
-border-radius:10px;
+border-radius:12px;
+border:1px solid #1f2937;
 }
 
 .portfolio-item{
@@ -69,7 +121,6 @@ padding:10px;
 margin-bottom:8px;
 display:flex;
 justify-content:space-between;
-align-items:center;
 border-radius:8px;
 }
 
@@ -81,7 +132,6 @@ padding:6px 10px;
 
 .locked{
 opacity:0.4;
-pointer-events:none;
 }
 
 table{
@@ -91,13 +141,15 @@ margin-top:20px;
 }
 
 td,th{
-border:1px solid #333;
+border:1px solid #1f2937;
 padding:8px;
+text-align:center;
 }
 
 canvas{
 background:#020617;
 margin-top:20px;
+border-radius:10px;
 }
 </style>
 </head>
@@ -110,11 +162,25 @@ margin-top:20px;
 
 <h2>Duration Lab</h2>
 
-<input id="face" value="1000" placeholder="Face Value">
-<input id="coupon" value="5" placeholder="Coupon %">
-<input id="yield" value="4" placeholder="Yield %">
-<input id="years" value="10" placeholder="Years">
-<input id="pos" value="100000" placeholder="Position">
+<label>Face Value ($)</label>
+<input id="face" value="1000">
+<div class="hint">Nominal bond value</div>
+
+<label>Coupon Rate (%)</label>
+<input id="coupon" value="5">
+<div class="hint">Annual interest payment</div>
+
+<label>Yield (%)</label>
+<input id="yield" value="4">
+<div class="hint">Market required return</div>
+
+<label>Maturity (Years)</label>
+<input id="years" value="10">
+<div class="hint">Time until repayment</div>
+
+<label>Position ($)</label>
+<input id="pos" value="100000">
+<div class="hint">Investment size</div>
 
 <button id="runBtn">Run Analysis</button>
 
@@ -140,56 +206,57 @@ margin-top:20px;
 <div class="card">
 <div class="label">Price</div>
 <div id="price" class="value">-</div>
-<div class="unit">USD (present value)</div>
+<div class="unit">USD</div>
 </div>
 
 <div class="card">
 <div class="label">Duration</div>
 <div id="dur" class="value">-</div>
-<div class="unit">Years (time-weighted)</div>
+<div class="unit">Years</div>
 </div>
 
 <div class="card">
 <div class="label">Mod Duration</div>
 <div id="mod" class="value">-</div>
-<div class="unit">% change per 1% yield</div>
+<div class="unit">% per 1% yield</div>
 </div>
 
 <div class="card">
 <div class="label">Convexity</div>
 <div id="conv" class="value">-</div>
-<div class="unit">Curvature adjustment</div>
+<div class="unit">Risk curvature</div>
 </div>
 
 </div>
 
-<div id="insight" class="insight">Run analysis...</div>
+<div id="insight" class="insight">
+Run analysis to see bond sensitivity insights
+</div>
 
 <canvas id="chart" width="900" height="250"></canvas>
 
 <table>
 <thead>
-<tr><th>Shock (bps)</th><th>Price Change</th><th>P/L ($)</th></tr>
+<tr>
+<th>Shock (bps)</th>
+<th>Price Change</th>
+<th>P/L ($)</th>
+</tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
 
 <div class="section">
-<h3>How to Read</h3>
-<ul>
-<li>Duration → approx % move for 1% rate change</li>
-<li>Convexity → improves accuracy on big moves</li>
-<li>Higher duration = higher risk</li>
-</ul>
+<h3>What this tool does</h3>
+<p>
+This tool models how bond prices react to interest rate changes.
+Duration measures sensitivity. Convexity improves accuracy.
+</p>
 </div>
 
-<div class="section">
+<div class="section locked">
 <h3>Portfolio Analysis (Premium)</h3>
-
-<div id="portfolioPremium" class="locked">
-<div id="portfolioOutput"></div>
-</div>
-
+<div id="portfolioOutput">Unlock premium to access portfolio analytics</div>
 </div>
 
 </div>
@@ -198,23 +265,24 @@ margin-top:20px;
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",()=>{
 
 let portfolio=[];
 
-// ELEMENTS
+// INPUTS
 const face=document.getElementById("face");
 const coupon=document.getElementById("coupon");
 const yieldEl=document.getElementById("yield");
 const years=document.getElementById("years");
 const pos=document.getElementById("pos");
 
+// OUTPUTS
 const price=document.getElementById("price");
 const dur=document.getElementById("dur");
 const mod=document.getElementById("mod");
 const conv=document.getElementById("conv");
-
 const insight=document.getElementById("insight");
+
 const table=document.getElementById("table");
 const chart=document.getElementById("chart");
 
@@ -223,6 +291,7 @@ const portfolioOutput=document.getElementById("portfolioOutput");
 
 // CALC
 function calc(F,c,y,n){
+
 let price=0,dur=0,conv=0;
 
 for(let t=1;t<=n;t++){
@@ -241,6 +310,7 @@ let mod=dur/(1+y);
 conv=conv/(price*Math.pow(1+y,2));
 
 return {price,dur,mod,conv};
+
 }
 
 // RUN
@@ -259,9 +329,10 @@ dur.textContent=r.dur.toFixed(2);
 mod.textContent=r.mod.toFixed(2);
 conv.textContent=r.conv.toFixed(2);
 
-insight.textContent="Duration: "+r.mod.toFixed(2)+" → estimated % move per 1% rate change";
+insight.textContent=
+"Estimated move: "+r.mod.toFixed(2)+"% per 1% rate change";
 
-// TABLE
+// SCENARIOS
 let shocks=[-200,-100,-50,-25,25,50,100,200];
 table.innerHTML="";
 let pts=[];
@@ -273,7 +344,8 @@ let pnl=p*change;
 
 pts.push(change);
 
-table.innerHTML+=`<tr>
+table.innerHTML+=`
+<tr>
 <td>${s}</td>
 <td>${(change*100).toFixed(2)}%</td>
 <td>${pnl.toFixed(0)}</td>
@@ -300,13 +372,14 @@ ctx.stroke();
 // ADD
 function addBond(){
 
-let F=+face.value;
-let c=+coupon.value/100;
-let y=+yieldEl.value/100;
-let n=+years.value;
-let p=+pos.value;
+portfolio.push({
+F:+face.value,
+c:+coupon.value/100,
+y:+yieldEl.value/100,
+n:+years.value,
+p:+pos.value
+});
 
-portfolio.push({F,c,y,n,p});
 renderPortfolio();
 
 }
@@ -317,6 +390,7 @@ function renderPortfolio(){
 portfolioList.innerHTML="";
 
 portfolio.forEach((b,i)=>{
+
 let div=document.createElement("div");
 div.className="portfolio-item";
 
@@ -326,12 +400,13 @@ div.innerHTML=`
 `;
 
 portfolioList.appendChild(div);
+
 });
 
 // DELETE
 document.querySelectorAll(".delete-btn").forEach(btn=>{
-btn.onclick=function(){
-portfolio.splice(this.dataset.id,1);
+btn.onclick=()=>{
+portfolio.splice(btn.dataset.id,1);
 renderPortfolio();
 };
 });
@@ -342,7 +417,7 @@ renderPortfolio();
 function analyzePortfolio(){
 
 if(portfolio.length===0){
-alert("No bonds");
+alert("Add bonds first");
 return;
 }
 
@@ -353,7 +428,9 @@ let r=calc(b.F,b.c,b.y,b.n);
 total+=b.p*(-r.mod*0.01);
 });
 
-portfolioOutput.innerText="Portfolio P/L (100bps): "+total.toFixed(0);
+portfolioOutput.textContent=
+"Portfolio P/L (100bps): "+total.toFixed(0);
+
 }
 
 // EVENTS
